@@ -5,6 +5,11 @@ module.exports = function(grunt) {
     jshint: {
       all: ['src/<%= pkg.name %>.js'],
       options: {
+        globals: {
+          module: true,
+          exports: true
+        },
+
         // Restrictions
         curly: true,
         eqeqeq: true,
@@ -37,12 +42,18 @@ module.exports = function(grunt) {
         dest: 'dist/<%= pkg.name %>.min.js'
       }
     },
+    jasmine_node: {
+      specNameMatcher: "spec",
+      projectRoot: ".",
+      requirejs: false,
+      forceExit: true
+    },
     watch: {
       scripts: {
-        files: ['src/*.js'],
-        tasks: ['jshint'],
+        files: ['src/*.js', 'spec/*.js'],
+        tasks: ['default'],
         options: {
-          nospawn: true,
+          nospawn: false,
         }
       },
     },
@@ -51,8 +62,11 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-concat');
+  grunt.loadNpmTasks('grunt-jasmine-node');
   grunt.loadNpmTasks('grunt-contrib-watch');
 
-  grunt.registerTask('default', ['jshint', 'concat', 'uglify']);
+  grunt.registerTask('default', ['jshint', 'test', 'build']);
+  grunt.registerTask('test', ['jasmine_node']);
+  grunt.registerTask('build', ['concat', 'uglify']);
 
 };
