@@ -1,6 +1,20 @@
 (function() {
     'use strict';
 
+    var objectToObservableMap; // Lazily instantiated
+    function getAllObservablesForObject(obj, createIfNotDefined) {
+        if (!objectToObservableMap) {
+            objectToObservableMap = new getWeakMapConstructor()();
+        }
+
+        var result = objectToObservableMap.get(obj);
+        if (!result && createIfNotDefined) {
+            result = {};
+            objectToObservableMap.set(obj, result);
+        }
+        return result;
+    }
+
     function track(obj, propertyNames) {
         var ko = this;
         propertyNames = propertyNames || Object.getOwnPropertyNames(obj);
@@ -14,13 +28,34 @@
                 get: observable,
                 set: observable
             });
+
+            getAllObservablesForObject(obj, true)[propertyName] = observable;
         });
 
         return obj;
     }
 
+    function getObservable(obj, propertyName) {
+        if (!obj || typeof obj !== 'object') {
+            return null;
+        }
+
+        var allObservablesForObject = getAllObservablesForObject(obj, false);
+        return (allObservablesForObject && allObservablesForObject[propertyName]) || null;
+    }
+
+    function valueHasMutated(obj, propertyName) {
+        var observable = getObservable(obj, propertyName);
+
+        if (observable) {
+            observable.valueHasMutated();
+        }
+    }
+
     function attachToKo(ko) {
         ko.track = track;
+        ko.getObservable = getObservable;
+        ko.valueHasMutated = valueHasMutated;
     }
 
     function prepareExports() {
