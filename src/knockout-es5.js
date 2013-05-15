@@ -6,7 +6,21 @@
 (function(global) {
     'use strict';
 
-    function track(obj) {
+    function track(obj, propertyNames) {
+        var ko = this;
+        propertyNames = propertyNames || Object.getOwnPropertyNames(obj);
+
+        propertyNames.forEach(function(propertyName) {
+            var observable = ko.observable(obj[propertyName]);
+
+            Object.defineProperty(obj, propertyName, {
+                configurable: true,
+                enumerable: true,
+                get: observable,
+                set: observable
+            });
+        });
+
         return obj;
     }
 

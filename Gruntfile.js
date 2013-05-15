@@ -23,6 +23,9 @@ module.exports = function(grunt) {
         strict: true,
         trailing: true,
 
+        // Allowances
+        validthis: true,
+
         // Environments
         browser: true,
       }
@@ -46,6 +49,7 @@ module.exports = function(grunt) {
       specNameMatcher: "spec",
       projectRoot: ".",
       requirejs: false,
+      useHelpers: true,
       forceExit: true
     },
     watch: {
