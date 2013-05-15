@@ -1,0 +1,23 @@
+{
+  "name": "knockout-es5",
+  "version": "0.0.1",
+  "description": "Knockout.js wields ECMAScript 5 properties",
+  "main": "knockout-es5.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-jshint": "~0.4.3",
+    "grunt-contrib-uglify": "~0.2.0",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-watch": "~0.4.3"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": "",
+  "author": "Steve Sanderson",
+  "license": "MIT"
+}
