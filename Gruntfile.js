@@ -3,11 +3,13 @@ module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     jshint: {
-      all: ['src/<%= pkg.name %>.js'],
+      all: ['src/knockout-es5.js'],
       options: {
         globals: {
           module: true,
-          exports: true
+          exports: true,
+          global: true,
+          getWeakMapConstructor: true
         },
 
         // Restrictions
@@ -32,7 +34,7 @@ module.exports = function(grunt) {
     },
     concat: {
       dist: {
-        src: ['src/<%= pkg.name %>.js', 'lib/weakmap.js'],
+        src: ['src/header.js', 'src/knockout-es5.js', 'lib/weakmap.js', 'src/footer.js'],
         dest: 'dist/<%= pkg.name %>.js'
       }
     },
@@ -69,8 +71,8 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-jasmine-node');
   grunt.loadNpmTasks('grunt-contrib-watch');
 
-  grunt.registerTask('default', ['jshint', 'test', 'build']);
   grunt.registerTask('test', ['jasmine_node']);
   grunt.registerTask('build', ['concat', 'uglify']);
+  grunt.registerTask('default', ['jshint', 'build', 'test']);
 
 };

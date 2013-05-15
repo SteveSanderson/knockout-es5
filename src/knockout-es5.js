@@ -1,9 +1,4 @@
-/*!
-    Knockout.js ES5 plugin
-    (c) Steven Sanderson - MIT license
-*/
-
-(function(global) {
+(function() {
     'use strict';
 
     function track(obj, propertyNames) {
@@ -29,7 +24,7 @@
     }
 
     function prepareExports() {
-        // If you're using a module loader, mix in this plugin using:
+        // If you're using a Node-style module loader, mix in this plugin using:
         //     require('knockout-es5').attach(ko);
         // ... where ko is the instance you've already loaded.
         // Or in a non-module case in a browser, just be sure to reference the knockout.js script file
@@ -46,4 +41,4 @@
 
     prepareExports();
 
-})(this);
+})();
