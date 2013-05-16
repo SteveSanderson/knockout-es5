@@ -10,6 +10,12 @@
                 expect(ko.track(obj)).toBe(obj);
             });
 
+            it("throws if the param value isn't an object", function () {
+                expect(function() {
+                    ko.track(null);
+                }).toThrow("When calling ko.track, you must pass an object as the first parameter.");
+            });
+
             it("makes all properties observable, given no args", function() {
                 var child = { },
                     obj = { a: 'string', b: 123, c: true, d: child };

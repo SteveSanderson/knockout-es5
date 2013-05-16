@@ -16,6 +16,10 @@
     }
 
     function track(obj, propertyNames) {
+        if (!obj || typeof obj !== 'object') {
+            throw new Error('When calling ko.track, you must pass an object as the first parameter.');
+        }
+
         var ko = this;
         propertyNames = propertyNames || Object.getOwnPropertyNames(obj);
 
