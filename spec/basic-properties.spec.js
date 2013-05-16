@@ -48,6 +48,37 @@
                 expect(obj).toHaveNonObservableProperty('b');
             });
 
+            it("retains existing observable properties, wrapping them in a getter/setter", function() {
+                var observable = ko.observable(123),
+                    obj = ko.track({ prop: observable });
+
+                expect(obj.prop).toBe(123);
+                expect(obj).toHaveObservableProperty('prop');
+
+                // Check that the property's value is determined by the observable value, and vice-versa
+                observable(456);
+                expect(obj.prop).toBe(456);
+                obj.prop = 789;
+                expect(observable()).toBe(789);
+            });
+
+            it("retains existing computed properties, wrapping them in a getter", function() {
+                var observable = ko.observable(123),
+                    computed = ko.computed(function() { return observable() + 1; }),
+                    obj = ko.track({ prop: computed });
+
+                expect(obj.prop).toBe(124);
+
+                // Check that the property's value is determined by the computed value
+                observable(456);
+                expect(obj.prop).toBe(457);
+
+                // Also verify it's read-only
+                obj.prop = 789;
+                expect(obj.prop).toBe(457);
+                expect(computed()).toBe(457);
+            });
+
         });
 
     });

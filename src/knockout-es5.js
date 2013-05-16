@@ -1,4 +1,4 @@
-(function() {
+(function(undefined) {
     'use strict';
 
     var objectToObservableMap; // Lazily instantiated
@@ -24,13 +24,14 @@
         propertyNames = propertyNames || Object.getOwnPropertyNames(obj);
 
         propertyNames.forEach(function(propertyName) {
-            var observable = ko.observable(obj[propertyName]);
+            var origValue = obj[propertyName],
+                observable = ko.isObservable(origValue) ? origValue : ko.observable(origValue);
 
             Object.defineProperty(obj, propertyName, {
                 configurable: true,
                 enumerable: true,
                 get: observable,
-                set: observable
+                set: ko.isWriteableObservable(observable) ? observable : undefined
             });
 
             getAllObservablesForObject(obj, true)[propertyName] = observable;
