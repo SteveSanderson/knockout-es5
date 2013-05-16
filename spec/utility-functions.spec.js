@@ -1,5 +1,5 @@
 (function() {
-    var ko = this.ko || require('./ko-loader');
+    var ko = this.ko || require('../src/knockout-es5.js');
 
     describe("Utility functions", function () {
 

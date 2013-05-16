@@ -1,10 +1,18 @@
-(function(undefined) {
+/*!
+ * Knockout ES5 plugin - https://github.com/SteveSanderson/knockout-es5
+ * Copyright (c) Steve Sanderson
+ * MIT license
+ */
+
+(function(global, undefined) {
     'use strict';
 
-    var objectToObservableMap; // Lazily instantiated
+    var objectToObservableMap,      // Lazily instantiated by getAllObservablesForObject
+        weakMapFactory;             // Created by prepareExports; implentation varies by module loader type
+
     function getAllObservablesForObject(obj, createIfNotDefined) {
         if (!objectToObservableMap) {
-            objectToObservableMap = new getWeakMapConstructor()();
+            objectToObservableMap = weakMapFactory();
         }
 
         var result = objectToObservableMap.get(obj);
@@ -64,21 +72,20 @@
     }
 
     function prepareExports() {
-        // If you're using a Node-style module loader, mix in this plugin using:
-        //     require('knockout-es5').attach(ko);
-        // ... where ko is the instance you've already loaded.
-        // Or in a non-module case in a browser, just be sure to reference the knockout.js script file
-        // before you reference knockout.es5.js, and we will attach to the global instance.
         if (typeof module !== 'undefined') {
-            module.exports = { attach: attachToKo };
-        } else if (typeof exports !== 'undefined') {
-            exports.attach = attachToKo;
+            // Node.js case - load KO and WeakMap modules synchronously
+            var ko = require('knockout'),
+                WM = require('weakmap');
+            attachToKo(ko);
+            weakMapFactory = function() { return new WM(); };
+            module.exports = ko;
         } else if ('ko' in global) {
-            // Non-module case - attach to the global instance
+            // Non-module case - attach to the global instance, and assume a global WeakMap instance
             attachToKo(global.ko);
+            weakMapFactory = function() { return new global.WeakMap(); };
         }
     }
 
     prepareExports();
 
-})();
+})(this);

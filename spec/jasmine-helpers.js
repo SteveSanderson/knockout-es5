@@ -1,5 +1,5 @@
 (function() {
-    var ko = this.ko || require('./ko-loader');
+    var ko = this.ko || require('knockout');
 
     jasmine.Matchers.prototype.toHaveObservableProperty = function (propName) {
         var obj = this.actual;
