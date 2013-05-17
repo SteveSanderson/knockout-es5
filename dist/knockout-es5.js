@@ -7,10 +7,6 @@
 (function(global, undefined) {
     'use strict';
 
-    // A function that returns a new ES6-compatible WeakMap instance (using ES5 shim if needed).
-    // Instantiated by prepareExports, accounting for which module loader is being used.
-    var weakMapFactory;
-
     // Model tracking
     // --------------
     //
@@ -20,14 +16,16 @@
     // Knockout's automatic dependency detection and notification triggering.
     //
     // For comparison, here's Knockout ES3-compatible syntax:
-    //     var firstNameLength = myModel.user().firstName().length; // Read a value
-    //     myModel.user().firstName('Bert'); // Write a value
+    //
+    //     var firstNameLength = myModel.user().firstName().length; // Read
+    //     myModel.user().firstName('Bert'); // Write
     //
     // ... versus Knockout-ES5 syntax:
-    //     var firstNameLength = myModel.user.firstName.length; // Read a value
-    //     myModel.user.firstName = 'Bert'; // Write a value
+    //
+    //     var firstNameLength = myModel.user.firstName.length; // Read
+    //     myModel.user.firstName = 'Bert'; // Write
 
-    // ko.track(model) converts each property on the given model object into a getter/setter pair that
+    // `ko.track(model)` converts each property on the given model object into a getter/setter pair that
     // wraps a Knockout observable. Optionally specify an array of property names to wrap; otherwise we
     // wrap all properties. If any of the properties are already observables, we replace them with
     // ES5 getter/setter pairs that wrap your original observable instances. In the case of readonly
@@ -76,7 +74,7 @@
         return obj;
     }
 
-    // Lazily created by getAllObservablesForObject below. Has to be created lazily because the
+    // Lazily created by `getAllObservablesForObject` below. Has to be created lazily because the
     // WeakMap factory isn't available until the module has finished loading (may be async).
     var objectToObservableMap;
 
@@ -107,7 +105,7 @@
     // However, instead of forcing developers to declare a ko.computed property explicitly, it's
     // nice to offer a utility function that declares a computed getter directly.
 
-    // Implements ko.defineProperty
+    // Implements `ko.defineProperty`
     function defineComputedProperty(obj, propertyName, evaluatorOrOptions) {
         var ko = this,
             computedOptions = { owner: obj, deferEvaluation: true };
@@ -136,19 +134,20 @@
     // --------------
     //
     // Arrays are special, because unlike other property types, they have standard mutator functions
-    // (push/pop/splice/etc.) and it's desirable to trigger a change notification whenever one of
+    // (`push`/`pop`/`splice`/etc.) and it's desirable to trigger a change notification whenever one of
     // those mutator functions is invoked.
     //
-    // Traditionally, Knockout handles this by putting special versions of push/pop/etc. on observable
+    // Traditionally, Knockout handles this by putting special versions of `push`/`pop`/etc. on observable
     // arrays that mutate the underlying array and then trigger a notification. That approach doesn't
     // work for Knockout-ES5 because properties now return the underlying arrays, so the mutator runs
     // in the context of the underlying array, not any particular observable:
     //
-    //     myModel.someCollection.push('New value'); // Operates on the underlying array value
+    //     // Operates on the underlying array value
+    //     myModel.someCollection.push('New value');
     //
     // To solve this, Knockout-ES5 detects array values, and modifies them as follows:
     //  1. Associates a hidden subscribable with each array instance that it encounters
-    //  2. Intercepts standard mutators (push/pop/etc.) and makes them trigger the subscribable
+    //  2. Intercepts standard mutators (`push`/`pop`/etc.) and makes them trigger the subscribable
     // Then, for model properties whose values are arrays, the property's underlying observable
     // subscribes to the array subscribable, so it can trigger a change notification after mutation.
 
@@ -179,7 +178,7 @@
         return subscribable.subscribe(observable);
     }
 
-    // Lazily created by getSubscribableForArray below. Has to be created lazily because the
+    // Lazily created by `getSubscribableForArray` below. Has to be created lazily because the
     // WeakMap factory isn't available until the module has finished loading (may be async).
     var arraySubscribablesMap;
 
@@ -248,14 +247,16 @@
     // ------------------------
     //
     // Since Knockout-ES5 sets up properties that return values, not observables, you can't
-    // trivially subscribe to the underlying observables (e.g., someProperty.subscribe(...)),
+    // trivially subscribe to the underlying observables (e.g., `someProperty.subscribe(...)`),
     // or tell them that object values have mutated, etc. To handle this, we set up some
     // extra utility functions that can return or work with the underlying observables.
 
-    // Returns the underlying observable associated with a model property (or null if the
+    // Returns the underlying observable associated with a model property (or `null` if the
     // model or property doesn't exist, or isn't associated with an observable). This means
     // you can subscribe to the property, e.g.:
-    //     ko.getObservable(model, 'propertyName').subscribe(function(newValue) { ... });
+    //
+    //     ko.getObservable(model, 'propertyName')
+    //       .subscribe(function(newValue) { ... });
     function getObservable(obj, propertyName) {
         if (!obj || typeof obj !== 'object') {
             return null;
@@ -279,9 +280,13 @@
     // ---------------------
     //
     // When this script is first evaluated, it works out what kind of module loading scenario
-    // it is in (Node.js or a browser <script> tag), stashes a reference to its dependencies
+    // it is in (Node.js or a browser `<script>` tag), stashes a reference to its dependencies
     // (currently that's just the WeakMap shim), and then finally attaches itself to whichever
     // instance of Knockout.js it can find.
+
+    // A function that returns a new ES6-compatible WeakMap instance (using ES5 shim if needed).
+    // Instantiated by prepareExports, accounting for which module loader is being used.
+    var weakMapFactory;
 
     // Extends a Knockout instance with Knockout-ES5 functionality
     function attachToKo(ko) {
@@ -301,7 +306,7 @@
             weakMapFactory = function() { return new WM(); };
             module.exports = ko;
         } else if ('ko' in global) {
-            // Non-module case - attach to the global instance, and assume a global WeakMap instance
+            // Non-module case - attach to the global instance, and assume a global WeakMap constructor
             attachToKo(global.ko);
             weakMapFactory = function() { return new global.WeakMap(); };
         }
