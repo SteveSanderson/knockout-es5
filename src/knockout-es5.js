@@ -116,11 +116,11 @@
             computedOptions.read = evaluatorOrOptions;
         } else {
             if ('value' in evaluatorOrOptions) {
-                throw Error('For ko.defineProperty, you must not specify a "value" for the property. You must provide a "get" function.');
+                throw new Error('For ko.defineProperty, you must not specify a "value" for the property. You must provide a "get" function.');
             }
 
             if (typeof evaluatorOrOptions.get !== 'function') {
-                throw Error('For ko.defineProperty, the third parameter must be either an evaluator function, or an options object containing a function called "get".')
+                throw new Error('For ko.defineProperty, the third parameter must be either an evaluator function, or an options object containing a function called "get".');
             }
 
             computedOptions.read = evaluatorOrOptions.get;
