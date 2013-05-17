@@ -8,6 +8,7 @@
     'use strict';
 
     var objectToObservableMap,      // Lazily instantiated by getAllObservablesForObject
+        arraySubscribablesMap,      // Lazily instantiated by getSubscribableForArray
         weakMapFactory;             // Created by prepareExports; implentation varies by module loader type
 
     function getAllObservablesForObject(obj, createIfNotDefined) {
@@ -33,7 +34,10 @@
 
         propertyNames.forEach(function(propertyName) {
             var origValue = obj[propertyName],
-                observable = ko.isObservable(origValue) ? origValue : ko.observable(origValue);
+                isArray = origValue instanceof Array,
+                observable = ko.isObservable(origValue) ? origValue
+                                              : isArray ? ko.observableArray(origValue)
+                                                        : ko.observable(origValue);
 
             Object.defineProperty(obj, propertyName, {
                 configurable: true,
@@ -43,9 +47,58 @@
             });
 
             getAllObservablesForObject(obj, true)[propertyName] = observable;
+
+            if (isArray) {
+                notifyWhenPresentOrFutureArrayValuesMutate(ko, observable);
+            }
         });
 
         return obj;
+    }
+
+    function notifyWhenPresentOrFutureArrayValuesMutate(ko, observable) {
+        // Both on initialization, and after any future value change, intercept the array's mutators and trigger the observable
+        var watchingArraySubscription = null;
+        ko.computed(function () {
+            if (watchingArraySubscription) {
+                watchingArraySubscription.dispose();
+                watchingArraySubscription = null;
+            }
+
+            var newArrayInstance = observable();
+            if (newArrayInstance instanceof Array) {
+                watchingArraySubscription = startWatchingArrayInstance(ko, observable, newArrayInstance);
+            }
+        });
+    }
+
+    function interceptArrayMutators(arrayInstance, subscribable) {
+        var origPush = arrayInstance.push;
+        arrayInstance.push = function() {
+            var result = origPush.apply(this, arguments);
+            subscribable.notifySubscribers(this);
+            return result;
+        };
+    }
+
+    function getSubscribableForArray(ko, arrayInstance) {
+        if (!arraySubscribablesMap) {
+            arraySubscribablesMap = weakMapFactory();
+        }
+
+        var subscribable = arraySubscribablesMap.get(arrayInstance);
+        if (!subscribable) {
+            subscribable = new ko.subscribable();
+            arraySubscribablesMap.set(arrayInstance, subscribable);
+            interceptArrayMutators(arrayInstance, subscribable);
+        }
+
+        return subscribable;
+    }
+
+    function startWatchingArrayInstance(ko, observable, arrayInstance) {
+        var subscribable = getSubscribableForArray(ko, arrayInstance);
+        return subscribable.subscribe(observable);
     }
 
     function getObservable(obj, propertyName) {
