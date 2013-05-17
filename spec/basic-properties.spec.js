@@ -79,6 +79,16 @@
                 expect(computed()).toBe(457);
             });
 
+            it("skips properties that are already tracked", function() {
+                var observable = ko.observable(123),
+                    obj = ko.track({ prop: observable }, ['prop']);
+                expect(ko.getObservable(obj, 'prop')).toBe(observable);
+
+                // Now track the property again
+                ko.track(obj, ['prop']);
+                expect(ko.getObservable(obj, 'prop')).toBe(observable);
+            });
+
         });
 
     });

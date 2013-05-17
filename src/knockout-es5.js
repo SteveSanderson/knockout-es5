@@ -30,7 +30,9 @@
     // ko.track(model) converts each property on the given model object into a getter/setter pair that
     // wraps a Knockout observable. Optionally specify an array of property names to wrap; otherwise we
     // wrap all properties. If any of the properties are already observables, we replace them with
-    // ES5 getter/setter pairs that wrap your original observable instances.
+    // ES5 getter/setter pairs that wrap your original observable instances. In the case of readonly
+    // ko.computed properties, we simply do not define a setter (so attempted writes will be ignored,
+    // which is how ES5 readonly properties normally behave).
     //
     // By design, this does *not* recursively walk child object properties, because making literally
     // everything everywhere independently observable is usually unhelpful. When you do want to track
@@ -41,10 +43,16 @@
             throw new Error('When calling ko.track, you must pass an object as the first parameter.');
         }
 
-        var ko = this;
+        var ko = this,
+            allObservablesForObject = getAllObservablesForObject(obj, true);
         propertyNames = propertyNames || Object.getOwnPropertyNames(obj);
 
         propertyNames.forEach(function(propertyName) {
+            // Skip properties that are already tracked
+            if (propertyName in allObservablesForObject) {
+                return;
+            }
+
             var origValue = obj[propertyName],
                 isArray = origValue instanceof Array,
                 observable = ko.isObservable(origValue) ? origValue
@@ -58,7 +66,7 @@
                 set: ko.isWriteableObservable(observable) ? observable : undefined
             });
 
-            getAllObservablesForObject(obj, true)[propertyName] = observable;
+            allObservablesForObject[propertyName] = observable;
 
             if (isArray) {
                 notifyWhenPresentOrFutureArrayValuesMutate(ko, observable);
@@ -85,6 +93,43 @@
             objectToObservableMap.set(obj, result);
         }
         return result;
+    }
+
+    // Computed properties
+    // -------------------
+    //
+    // The preceding code is already sufficient to upgrade ko.computed model properties to ES5
+    // getter/setter pairs (or in the case of readonly ko.computed properties, just a getter).
+    // These then behave like a regular property with a getter function, except they are smarter:
+    // your evaluator is only invoked when one of its dependencies changes. The result is cached
+    // and used for all evaluations until the next time a dependency changes).
+    //
+    // However, instead of forcing developers to declare a ko.computed property explicitly, it's
+    // nice to offer a utility function that declares a computed getter directly.
+
+    // Implements ko.defineProperty
+    function defineComputedProperty(obj, propertyName, evaluatorOrOptions) {
+        var ko = this,
+            computedOptions = { owner: obj, deferEvaluation: true };
+
+        if (typeof evaluatorOrOptions === 'function') {
+            computedOptions.read = evaluatorOrOptions;
+        } else {
+            if ('value' in evaluatorOrOptions) {
+                throw Error('For ko.defineProperty, you must not specify a "value" for the property. You must provide a "get" function.');
+            }
+
+            if (typeof evaluatorOrOptions.get !== 'function') {
+                throw Error('For ko.defineProperty, the third parameter must be either an evaluator function, or an options object containing a function called "get".')
+            }
+
+            computedOptions.read = evaluatorOrOptions.get;
+            computedOptions.write = evaluatorOrOptions.set;
+        }
+
+        obj[propertyName] = ko.computed(computedOptions);
+        track.call(ko, obj, [propertyName]);
+        return obj;
     }
 
     // Array handling
@@ -243,6 +288,7 @@
         ko.track = track;
         ko.getObservable = getObservable;
         ko.valueHasMutated = valueHasMutated;
+        ko.defineProperty = defineComputedProperty;
     }
 
     // Determines which module loading scenario we're in, grabs dependencies, and attaches to KO
