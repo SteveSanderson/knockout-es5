@@ -156,12 +156,14 @@
 
     // After each array mutation, fires a notification on the given subscribable
     function wrapStandardArrayMutators(arrayInstance, subscribable) {
-        var origPush = arrayInstance.push;
-        arrayInstance.push = function() {
-            var result = origPush.apply(this, arguments);
-            subscribable.notifySubscribers(this);
-            return result;
-        };
+        ['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'].forEach(function(fnName) {
+            var origMutator = arrayInstance[fnName];
+            arrayInstance[fnName] = function() {
+                var result = origMutator.apply(this, arguments);
+                subscribable.notifySubscribers(this);
+                return result;
+            };
+        });
     }
 
     // Static utility functions

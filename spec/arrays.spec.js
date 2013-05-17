@@ -62,12 +62,31 @@
             obj.myArray = [1, 2, 3];
             expect(lastNotifiedValue()).toBe('1,2,3');
 
+            // Check standard mutators
             obj.myArray.push(4);
             expect(lastNotifiedValue()).toBe('1,2,3,4');
 
+            expect(obj.myArray.pop()).toBe(4);
+            expect(lastNotifiedValue()).toBe('1,2,3');
+
+            obj.myArray.unshift('X');
+            expect(lastNotifiedValue()).toBe('X,1,2,3');
+
+            expect(obj.myArray.shift()).toBe('X');
+            expect(lastNotifiedValue()).toBe('1,2,3');
+
+            expect(obj.myArray.reverse()).toEqual([3,2,1]);
+            expect(lastNotifiedValue()).toBe('3,2,1');
+
+            expect(obj.myArray.sort()).toEqual([1,2,3]);
+            expect(lastNotifiedValue()).toBe('1,2,3');
+
+            expect(obj.myArray.splice(1, 1)).toEqual([2]);
+            expect(lastNotifiedValue()).toBe('1,3');
+
             // Mutating the original no longer triggers anything
             plainArray.push('X');
-            expect(lastNotifiedValue()).toBe('1,2,3,4');
+            expect(lastNotifiedValue()).toBe('1,3');
         });
     });
 })();
