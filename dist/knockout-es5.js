@@ -148,21 +148,54 @@
         if (!subscribable) {
             subscribable = new ko.subscribable();
             arraySubscribablesMap.set(arrayInstance, subscribable);
-            wrapStandardArrayMutators(arrayInstance, subscribable);
+
+            var notificationPauseSignal = {};
+            wrapStandardArrayMutators(arrayInstance, subscribable, notificationPauseSignal);
+            addKnockoutArrayMutators(ko, arrayInstance, subscribable, notificationPauseSignal);
         }
 
         return subscribable;
     }
 
     // After each array mutation, fires a notification on the given subscribable
-    function wrapStandardArrayMutators(arrayInstance, subscribable) {
+    function wrapStandardArrayMutators(arrayInstance, subscribable, notificationPauseSignal) {
         ['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'].forEach(function(fnName) {
             var origMutator = arrayInstance[fnName];
             arrayInstance[fnName] = function() {
                 var result = origMutator.apply(this, arguments);
-                subscribable.notifySubscribers(this);
+                if (notificationPauseSignal.pause !== true) {
+                    subscribable.notifySubscribers(this);
+                }
                 return result;
             };
+        });
+    }
+
+    // Adds Knockout's additional array mutation functions to the array
+    function addKnockoutArrayMutators(ko, arrayInstance, subscribable, notificationPauseSignal) {
+        ['remove', 'removeAll', 'destroy', 'destroyAll', 'replace'].forEach(function(fnName) {
+            // Make it a non-enumerable property for consistency with standard Array functions
+            Object.defineProperty(arrayInstance, fnName, {
+                enumerable: false,
+                value: function() {
+                    var result;
+
+                    // These additional array mutators are built using the underlying push/pop/etc.
+                    // mutators, which are wrapped to trigger notifications. But we don't want to
+                    // trigger multiple notifications, so pause the push/pop/etc. wrappers and
+                    // delivery only one notification at the end of the process.
+                    notificationPauseSignal.pause = true;
+                    try {
+                        // Creates a temporary observableArray that can perform the operation.
+                        result = ko.observableArray.fn[fnName].apply(ko.observableArray(arrayInstance), arguments);
+                    }
+                    finally {
+                        notificationPauseSignal.pause = false;
+                    }
+                    subscribable.notifySubscribers(arrayInstance);
+                    return result;
+                }
+            });
         });
     }
 

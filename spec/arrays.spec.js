@@ -88,5 +88,46 @@
             plainArray.push('X');
             expect(lastNotifiedValue()).toBe('1,3');
         });
+
+        it("adds Knockout's additional array mutators and issues notifications", function() {
+            var plainArray = [{ name: 'a' }, { name: 'b' }, { name: 'c'} ],
+                obj = ko.track({ myArray: plainArray }),
+                stringify = function(array) { return array.map(function(v) { return v.name }).join(','); },
+                lastNotifiedValue = ko.computed(function() { return stringify(obj.myArray); }),
+                destroyedValues = ko.computed(function() { return stringify(obj.myArray.filter(function(v) { return v._destroy; })); });
+
+            expect(lastNotifiedValue()).toBe('a,b,c');
+            expect(destroyedValues()).toBe('');
+
+            obj.myArray.replace(plainArray[1], { name: 'b2' });
+            expect(lastNotifiedValue()).toBe('a,b2,c');
+
+            obj.myArray.destroy(plainArray[1]);
+            expect(destroyedValues()).toBe('b2');
+
+            obj.myArray.destroyAll();
+            expect(destroyedValues()).toBe('a,b2,c');
+
+            obj.myArray.remove(plainArray[1]);
+            expect(lastNotifiedValue()).toBe('a,c');
+
+            obj.myArray.removeAll();
+            expect(lastNotifiedValue()).toBe('');
+        });
+
+        it("only triggers one notification at the end of a Knockout mutator function", function() {
+            var plainArray = [1, 2, 3, 4, 5],
+                obj = ko.track({ myArray: plainArray }),
+                allNotifiedValues = [];
+            ko.getObservable(obj, 'myArray').subscribe(function(val) { allNotifiedValues.push(val.join(',')); });
+
+            expect(allNotifiedValues).toEqual([]);
+
+            // Even though the following call removes each of 1,2,3 as a separate splice, we get
+            // only one notification
+            obj.myArray.remove(function(v) { return v < 4; });
+            expect(allNotifiedValues.length).toBe(1);
+            expect(allNotifiedValues).toEqual(['4,5']);
+        });
     });
 })();
