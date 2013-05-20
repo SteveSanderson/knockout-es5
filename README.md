@@ -1,7 +1,7 @@
 knockout-es5
 ============
 
-Knockout.js meets ECMAScript 5 properties. More info to follow.
+Knockout.js meets ECMAScript 5 properties. Read the [introduction and basic usage guide](http://blog.stevensanderson.com/2013/05/20/knockout-es5-a-plugin-to-simplify-your-syntax/).
 
 Installation
 ============
