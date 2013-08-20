@@ -51,6 +51,11 @@
                 return;
             }
 
+            // Skip properties where descriptor can't be redefined
+            if ( false === Object.getOwnPropertyDescriptor(obj, propertyName).configurable ){
+                return;
+            }
+
             var origValue = obj[propertyName],
                 isArray = origValue instanceof Array,
                 observable = ko.isObservable(origValue) ? origValue
