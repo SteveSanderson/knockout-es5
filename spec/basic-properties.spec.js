@@ -91,5 +91,32 @@
 
         });
 
+        describe("ko.untrack()", function() {
+
+            it("releases the internal reference to the observable", function() {
+                var obj = { a: 1 };
+                ko.track(obj);
+
+                ko.untrack(obj);
+                expect(ko.getObservable(obj, "a")).toBeNull();
+            });
+
+            it("releases the internal reference to specified properties", function() {
+                var obj = { a: 1 };
+                ko.track(obj);
+
+                ko.untrack(obj, ["a"]);
+                expect(ko.getObservable(obj, "a")).toBeNull();
+            });
+
+            it("leaves properties tracked that aren't specified", function() {
+                var obj = { a: 1, b: 2 };
+                ko.track(obj);
+
+                ko.untrack(obj, ["a"]);
+                expect(ko.getObservable(obj, "b")).not.toBeNull();
+            });
+
+        });
     });
 })();
