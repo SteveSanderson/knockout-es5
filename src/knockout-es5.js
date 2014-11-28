@@ -98,6 +98,26 @@
         return result;
     }
 
+    // Removes the internal references to observables mapped to the specified properties
+    // or the entire object reference if no properties are passed in. This allows the
+    // observables to be replaced and tracked again.
+    function untrack(obj, propertyNames) {
+        if (!objectToObservableMap) {
+            return;
+        }
+
+        if (arguments.length === 1) {
+            objectToObservableMap.delete(obj);
+        } else {
+            var allObservablesForObject = getAllObservablesForObject(obj, false); 
+            if (allObservablesForObject) {
+                propertyNames.forEach(function(propertyName) {
+                    delete allObservablesForObject[propertyName];
+                });
+            }   
+        }
+    }
+
     // Computed properties
     // -------------------
     //
@@ -296,6 +316,7 @@
     // Extends a Knockout instance with Knockout-ES5 functionality
     function attachToKo(ko) {
         ko.track = track;
+        ko.untrack = untrack;
         ko.getObservable = getObservable;
         ko.valueHasMutated = valueHasMutated;
         ko.defineProperty = defineComputedProperty;
