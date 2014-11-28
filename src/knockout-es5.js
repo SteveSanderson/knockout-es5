@@ -7,6 +7,8 @@
 (function(global, undefined) {
     'use strict';
 
+    var ko;
+
     // Model tracking
     // --------------
     //
@@ -41,8 +43,7 @@
             throw new Error('When calling ko.track, you must pass an object as the first parameter.');
         }
 
-        var ko = this,
-            allObservablesForObject = getAllObservablesForObject(obj, true);
+        var allObservablesForObject = getAllObservablesForObject(obj, true);
         propertyNames = propertyNames || Object.getOwnPropertyNames(obj);
 
         propertyNames.forEach(function(propertyName) {
@@ -57,7 +58,7 @@
             }
 
             var origValue = obj[propertyName],
-                isArray = origValue instanceof Array,
+                isArray = Array.isArray(origValue),
                 observable = ko.isObservable(origValue) ? origValue
                                               : isArray ? ko.observableArray(origValue)
                                                         : ko.observable(origValue);
@@ -107,14 +108,14 @@
         }
 
         if (arguments.length === 1) {
-            objectToObservableMap.delete(obj);
+            objectToObservableMap['delete'](obj);
         } else {
-            var allObservablesForObject = getAllObservablesForObject(obj, false); 
+            var allObservablesForObject = getAllObservablesForObject(obj, false);
             if (allObservablesForObject) {
                 propertyNames.forEach(function(propertyName) {
                     delete allObservablesForObject[propertyName];
                 });
-            }   
+            }
         }
     }
 
@@ -326,13 +327,21 @@
     function prepareExports() {
         if (typeof module !== 'undefined') {
             // Node.js case - load KO and WeakMap modules synchronously
-            var ko = require('knockout'),
-                WM = require('weakmap');
+            ko = require('knockout');
+            var WM = require('weakmap');
             attachToKo(ko);
             weakMapFactory = function() { return new WM(); };
             module.exports = ko;
+        } else if (typeof global.define === 'function' && global.define.amd) {
+            global.define(['knockout'], function(koModule) {
+                ko = koModule;
+                attachToKo(koModule);
+                weakMapFactory = function() { return new global.WeakMap(); };
+                return koModule;
+            });
         } else if ('ko' in global) {
             // Non-module case - attach to the global instance, and assume a global WeakMap constructor
+            ko = global.ko;
             attachToKo(global.ko);
             weakMapFactory = function() { return new global.WeakMap(); };
         }

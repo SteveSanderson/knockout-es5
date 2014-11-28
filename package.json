@@ -1,6 +1,6 @@
 {
   "name": "knockout-es5",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Knockout.js wields ECMAScript 5 properties",
   "main": "knockout-es5.js",
   "directories": {
