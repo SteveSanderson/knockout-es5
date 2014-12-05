@@ -5,7 +5,7 @@ module.exports = function (config) {
     // list of files / patterns to load in the browser
     files: [
       'node_modules/knockout/build/output/knockout-latest.js',
-      'dist/knockout-es5.js',
+      'dist/knockout-es5.min.js',
       'test/*.js'
     ],
 
