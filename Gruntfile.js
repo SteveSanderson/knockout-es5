@@ -74,7 +74,7 @@ module.exports = function(grunt) {
 
     watch: {
       scripts: {
-        files: ['src/*.js', 'spec/*.js'],
+        files: ['src/*.js', 'test/*.js'],
         tasks: ['default'],
         options: {
           nospawn: false
