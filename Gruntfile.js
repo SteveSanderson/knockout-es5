@@ -27,15 +27,17 @@ module.exports = function(grunt) {
         validthis: true,
 
         // Environments
-        browser: true,
+        browser: true
       }
     },
+
     concat: {
       dist: {
         src: ['src/knockout-es5.js', 'lib/weakmap.js'],
         dest: 'dist/<%= pkg.name %>.js'
       }
     },
+
     uglify: {
       options: {
         preserveComments: 'some'
@@ -45,6 +47,7 @@ module.exports = function(grunt) {
         dest: 'dist/<%= pkg.name %>.min.js'
       }
     },
+
     jasmine_node: {
       specNameMatcher: "spec",
       projectRoot: ".",
@@ -52,14 +55,31 @@ module.exports = function(grunt) {
       useHelpers: true,
       forceExit: true
     },
+
+    karma: {
+      options: {
+        configFile: 'karma.conf.js'
+      },
+
+      local: {
+        browsers: [
+          'Chrome'
+        ],
+        // coverage reporter generates the coverage
+        reporters: [
+          'dots'
+        ]
+      }
+    },
+
     watch: {
       scripts: {
         files: ['src/*.js', 'spec/*.js'],
         tasks: ['default'],
         options: {
-          nospawn: false,
+          nospawn: false
         }
-      },
+      }
     }
   });
 
@@ -68,8 +88,10 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-jasmine-node');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-karma');
 
-  grunt.registerTask('test', ['jasmine_node']);
+  //grunt.registerTask('test', ['jasmine_node']);
+  grunt.registerTask('test', ['karma:local']);
   grunt.registerTask('build', ['concat', 'uglify']);
   grunt.registerTask('default', ['jshint', 'test', 'build']);
 
