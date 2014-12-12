@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports = function(grunt) {
 
   grunt.initConfig({
@@ -5,29 +7,7 @@ module.exports = function(grunt) {
     jshint: {
       all: ['src/knockout-es5.js'],
       options: {
-        globals: {
-          module: true,
-          require: true
-        },
-
-        // Restrictions
-        curly: true,
-        eqeqeq: true,
-        indent: 4,
-        latedef: true,
-        newcap: true,
-        noempty: true,
-        quotmark: 'single',
-        undef: true,
-        unused: true,
-        strict: true,
-        trailing: true,
-
-        // Allowances
-        validthis: true,
-
-        // Environments
-        browser: true
+        jshintrc: true
       }
     },
 
@@ -83,6 +63,6 @@ module.exports = function(grunt) {
 
   grunt.registerTask('test', ['karma:local']);
   grunt.registerTask('build', ['concat', 'uglify']);
-  grunt.registerTask('default', ['jshint', 'test', 'build']);
+  grunt.registerTask('default', ['jshint', 'build', 'test']);
 
 };
