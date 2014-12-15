@@ -6,8 +6,13 @@ Knockout.js meets ECMAScript 5 properties. Read the [introduction and basic usag
 Installation
 ============
 
-To use in a client-side web application, get a copy of the [`knockout-es5.min.js` file](https://raw.github.com/SteveSanderson/knockout-es5/master/dist/knockout-es5.min.js),
-and just add a `<script>` tag referencing at. Be sure to place the reference *after* your reference to Knockout itself:
+To use in a bower:
+
+    bower install knockout-es5
+
+Or, get a copy of the [`knockout-es5.min.js` file](https://raw.github.com/SteveSanderson/knockout-es5/master/dist/knockout-es5.min.js)
+
+Then just add a `<script>` tag referencing at. Be sure to place the reference *after* your reference to Knockout itself:
 
     <script src='knockout-x.y.z.js'></script>
     <script src='knockout-es5.min.js'></script>
