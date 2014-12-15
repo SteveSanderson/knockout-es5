@@ -43,6 +43,62 @@ module.exports = function (config) {
 
     // level of logging
     // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
-    logLevel: config.LOG_INFO
+    logLevel: config.LOG_INFO,
+
+    sauceLabs: {
+      testName: 'knockout-es5',
+      build: process.env.TRAVIS_JOB_ID,
+      recordScreenshots: false
+    },
+
+    customLaunchers: {
+      sauce_chrome: {
+        base: 'SauceLabs',
+        browserName: 'chrome',
+        platform: 'Windows 7'
+      },
+      sauce_chrome_linux: {
+        base: 'SauceLabs',
+        browserName: 'chrome'
+      },
+      sauce_firefox: {
+        base: 'SauceLabs',
+        browserName: 'firefox',
+        platform: 'Windows 7'
+      },
+      sauce_firefox_linux: {
+        base: 'SauceLabs',
+        browserName: 'firefox'
+      },
+      sauce_safari: {
+        base: 'SauceLabs',
+        browserName: 'safari',
+        platform: 'OS X 10.9'
+      },
+      sauce_ie_8: {
+        base: 'SauceLabs',
+        browserName: 'internet explorer',
+        platform: 'Windows XP',
+        version: '8'
+      },
+      sauce_ie_9: {
+        base: 'SauceLabs',
+        browserName: 'internet explorer',
+        platform: 'Windows 7',
+        version: '9'
+      },
+      sauce_ie_10: {
+        base: 'SauceLabs',
+        browserName: 'internet explorer',
+        platform: 'Windows 7',
+        version: '10'
+      },
+      sauce_ie_11: {
+        base: 'SauceLabs',
+        browserName: 'internet explorer',
+        platform: 'Windows 8.1',
+        version: '11'
+      }
+    }
   });
 };
