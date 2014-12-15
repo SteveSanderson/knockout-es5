@@ -27,6 +27,7 @@
     "src",
     "Gruntfile.js",
     "karma.conf.js",
-    "package.json"
+    "package.json",
+    "bower.json"
   ]
 }
