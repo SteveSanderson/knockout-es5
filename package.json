@@ -1,12 +1,18 @@
 {
   "name": "knockout-es5",
   "version": "0.1.0",
-  "description": "Knockout.js wields ECMAScript 5 properties",
-  "main": "knockout-es5.js",
+  "description": "Knockout.js meets ECMAScript 5 properties",
+  "author": "Steve Sanderson",
+  "main": "dist/knockout-es5.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/SteveSanderson/knockout-es5.git"
   },
+  "keywords": [
+    "knockout",
+    "es5",
+    "data-binding"
+  ],
   "directories": {
     "test": "test"
   },
@@ -34,6 +40,5 @@
   "scripts": {
     "test": "grunt test"
   },
-  "author": "Steve Sanderson",
   "license": "MIT"
 }
