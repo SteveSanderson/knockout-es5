@@ -80,7 +80,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('test', ['karma:local']);
   grunt.registerTask('build', ['concat', 'uglify']);
-  grunt.registerTask('travis', ['build', 'karma:sauce']);
+  grunt.registerTask('travis', ['jshint', 'build', 'karma:sauce']);
   grunt.registerTask('default', ['jshint', 'build', 'test']);
 
 };
