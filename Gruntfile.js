@@ -37,9 +37,26 @@ module.exports = function(grunt) {
         browsers: [
           'Chrome'
         ],
-        // coverage reporter generates the coverage
         reporters: [
           'dots'
+        ]
+      },
+
+      sauce: {
+        reporters: [
+          'dots',
+          'saucelabs'
+        ],
+        browsers: [
+          'sauce_chrome',
+          //'sauce_chrome_linux',
+          'sauce_firefox',
+          //'sauce_firefox_linux',
+          'sauce_safari',
+          //'sauce_ie_8',
+          'sauce_ie_9',
+          'sauce_ie_10',
+          'sauce_ie_11'
         ]
       }
     },
@@ -63,6 +80,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('test', ['karma:local']);
   grunt.registerTask('build', ['concat', 'uglify']);
+  grunt.registerTask('travis', ['build', 'karma:sauce']);
   grunt.registerTask('default', ['jshint', 'build', 'test']);
 
 };
