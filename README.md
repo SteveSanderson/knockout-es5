@@ -13,14 +13,16 @@ To use in a bower:
 Or, get a copy of the [`knockout-es5.min.js` file](https://raw.github.com/SteveSanderson/knockout-es5/master/dist/knockout-es5.min.js)
 
 Then just add a `<script>` tag referencing at. Be sure to place the reference *after* your reference to Knockout itself:
-
-    <script src='knockout-x.y.z.js'></script>
-    <script src='knockout-es5.min.js'></script>
+```html
+<script src='knockout-x.y.z.js'></script>
+<script src='knockout-es5.min.js'></script>
+```
 
 If you are using this on the server in Node.js, just require the file as a module:
-
-    var ko = require('./knockout-es5');
-    // Now use ko - it has been enhanced with ES5 features
+```js
+var ko = require('./knockout-es5');
+// Now use ko - it has been enhanced with ES5 features
+```
 
 How to build from source
 ========================
