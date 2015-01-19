@@ -32,7 +32,8 @@
   "browserify": true,
 
   "globals": {
-    "define": false,
+    "ko": false,
+    "global": true,
     "global": true,
 
     "describe": false,
