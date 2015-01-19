@@ -6,8 +6,14 @@ describe('Computed properties', function () {
       var model = { prop: 100 },
         timesEvaluated = 0,
         notifiedValues = [];
-      ko.defineProperty(model, 'propPlusOne', function() { timesEvaluated++; return model.prop + 1; });
-      ko.getObservable(model, 'propPlusOne').subscribe(function(notifiedValue) { notifiedValues.push(notifiedValue); });
+
+      ko.defineProperty(model, 'propPlusOne', function() {
+        timesEvaluated++;
+        return model.prop + 1;
+      });
+      ko.getObservable(model, 'propPlusOne').subscribe(function(notifiedValue) {
+        notifiedValues.push(notifiedValue);
+      });
 
       // Important: defineProperty can be called *before* its dependencies are tracked (because evaluation is deferred)
       ko.track(model);
