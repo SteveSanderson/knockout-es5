@@ -29,12 +29,12 @@
   "validthis": true,
 
   "browser": true,
-  "browserify": true,
+  "node": true,
 
   "globals": {
     "ko": false,
     "global": true,
-    "global": true,
+    "define": false,
 
     "describe": false,
     "it": false,
