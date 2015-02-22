@@ -327,7 +327,7 @@
 
   // Determines which module loading scenario we're in, grabs dependencies, and attaches to KO
   function prepareExports() {
-    if (typeof module !== 'undefined') {
+    if (typeof exports === 'object' && typeof module === 'object') {
       // Node.js case - load KO and WeakMap modules synchronously
       ko = require('knockout');
       var WM = require('weakmap');
