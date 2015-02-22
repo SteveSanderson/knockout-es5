@@ -14,7 +14,7 @@ module.exports = function(grunt) {
     concat: {
       dist: {
         src: ['src/knockout-es5.js', 'lib/weakmap.js'],
-        dest: 'dist/<%= pkg.name %>.js'
+        dest: 'dist/knockout-es5.js'
       }
     },
 
@@ -23,8 +23,8 @@ module.exports = function(grunt) {
         preserveComments: 'some'
       },
       build: {
-        src: 'dist/<%= pkg.name %>.js',
-        dest: 'dist/<%= pkg.name %>.min.js'
+        src: 'dist/knockout-es5.js',
+        dest: 'dist/knockout-es5.min.js'
       }
     },
 
