@@ -330,7 +330,13 @@
     if (typeof exports === 'object' && typeof module === 'object') {
       // Node.js case - load KO and WeakMap modules synchronously
       ko = require('knockout');
-      var WM = require('weakmap');
+      var WM;
+      if (typeof module.exports === 'function') {
+        // Exported function from concatenated lib/weakmap.js
+        WM = module.exports;
+      } else {
+        WM = require('weakmap');
+      }
       attachToKo(ko);
       weakMapFactory = function() { return new WM(); };
       module.exports = ko;

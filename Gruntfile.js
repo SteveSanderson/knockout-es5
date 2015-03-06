@@ -13,7 +13,7 @@ module.exports = function(grunt) {
 
     concat: {
       dist: {
-        src: ['src/knockout-es5.js', 'lib/weakmap.js'],
+        src: ['lib/weakmap.js', 'src/knockout-es5.js'],
         dest: 'dist/knockout-es5.js'
       }
     },
