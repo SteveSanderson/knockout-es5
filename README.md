@@ -24,6 +24,22 @@ var ko = require('./knockout-es5');
 // Now use ko - it has been enhanced with ES5 features
 ```
 
+Recursive traversal of nested objects
+=====================================
+```js
+ko.track(nestedObj, { deep: true });
+```
+With fields:
+```js
+ko.track(nestedObj, { deep: true, fields: ['prop1', 'prop2'] });
+```
+Selecting of nested fields (e.g. `'prop.nested_prop'`) are not yet supported. If someone need this feature, please create an issue.
+
+Usage `fields` prop without `deep`:
+```js
+ko.track(obj, { fields: ['prop1', 'prop2'] });
+```
+
 How to build from source
 ========================
 
