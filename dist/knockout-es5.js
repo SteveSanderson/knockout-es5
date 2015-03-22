@@ -38,46 +38,121 @@
   // everything everywhere independently observable is usually unhelpful. When you do want to track
   // child object properties independently, define your own class for those child objects and put
   // a separate ko.track call into its constructor --- this gives you far more control.
-  function track(obj, propertyNames) {
+  /**
+   * @param {object} obj
+   * @param {object|array.<string>} propertyNamesOrSettings
+   * @param {boolean} propertyNamesOrSettings.deep Use deep track.
+   * @param {array.<string>} propertyNamesOrSettings.fields Array of property names to wrap.
+   * todo: @param {array.<string>} propertyNamesOrSettings.exclude Array of exclude property names to wrap.
+   * todo: @param {function(string, *):boolean} propertyNamesOrSettings.filter Function to filter property names to wrap. A function that takes ... params
+   * @return {object}
+   */
+  function track(obj, propertyNamesOrSettings) {
     if (!obj || typeof obj !== 'object') {
       throw new Error('When calling ko.track, you must pass an object as the first parameter.');
     }
 
+    var propertyNames;
+
+    if ( isPlainObject(propertyNamesOrSettings) ) {
+      // defaults
+      propertyNamesOrSettings.deep = propertyNamesOrSettings.deep || false;
+      propertyNamesOrSettings.fields = propertyNamesOrSettings.fields || Object.getOwnPropertyNames(obj);
+
+      if (propertyNamesOrSettings.deep === true) {
+        trackDeep(propertyNamesOrSettings.fields, obj);
+      } else {
+        return track(obj, propertyNamesOrSettings.fields);
+      }
+
+    } else {
+      propertyNames = propertyNamesOrSettings || Object.getOwnPropertyNames(obj);
+      propertyNames.forEach(function(propertyName) {
+        wrap(propertyName, null, obj);
+      });
+    }
+
+    return obj;
+  }
+
+  var rFunctionName = /^function\s*([^\s(]+)/;
+  function getFunctionName( ctor ){
+    if (ctor.name) {
+      return ctor.name;
+    }
+    return (ctor.toString().trim().match( rFunctionName ) || [])[1];
+  }
+
+  function trackDeep(tree, obj) {
+    var keys = Array.isArray(tree) ? tree : Object.keys(tree);
+    var limb;
+
+    keys.forEach(function(key) {
+      limb = obj[key];
+
+      wrap(key,
+          (('Object' === getFunctionName(limb.constructor)
+          && Object.keys(limb).length)
+              ? limb
+              : null),
+          obj);
+    });
+  }
+
+  // Wrap property into observable
+  function wrap(prop, subprops, obj) {
     var allObservablesForObject = getAllObservablesForObject(obj, true);
-    propertyNames = propertyNames || Object.getOwnPropertyNames(obj);
+    var origValue, observable, isArray;
 
-    propertyNames.forEach(function(propertyName) {
-      // Skip properties that are already tracked
-      if (propertyName in allObservablesForObject) {
-        return;
-      }
+    if (subprops) {
+      origValue = obj[prop];
+      observable = ko.isObservable(origValue) ? origValue : ko.observable(origValue);
 
-      // Skip properties where descriptor can't be redefined
-      if ( false === Object.getOwnPropertyDescriptor(obj, propertyName).configurable ){
-        return;
-      }
-
-      var origValue = obj[propertyName],
-        isArray = Array.isArray(origValue),
-        observable = ko.isObservable(origValue) ? origValue
-          : isArray ? ko.observableArray(origValue)
-          : ko.observable(origValue);
-
-      Object.defineProperty(obj, propertyName, {
+      Object.defineProperty(obj, prop, {
         configurable: true,
         enumerable: true,
         get: observable,
         set: ko.isWriteableObservable(observable) ? observable : undefined
       });
 
-      allObservablesForObject[propertyName] = observable;
+      allObservablesForObject[prop] = observable;
+
+      trackDeep(subprops, obj[prop]);
+
+    } else {
+      // Skip properties that are already tracked
+      if (prop in allObservablesForObject) {
+        return;
+      }
+
+      // Skip properties where descriptor can't be redefined
+      if (Object.getOwnPropertyDescriptor(obj, prop).configurable === false){
+        return;
+      }
+
+      origValue = obj[prop];
+      isArray = Array.isArray(origValue);
+      observable = ko.isObservable(origValue) ? origValue
+          : isArray ? ko.observableArray(origValue)
+          : ko.observable(origValue);
+
+      Object.defineProperty(obj, prop, {
+        configurable: true,
+        enumerable: true,
+        get: observable,
+        set: ko.isWriteableObservable(observable) ? observable : undefined
+      });
+
+      allObservablesForObject[prop] = observable;
 
       if (isArray) {
         notifyWhenPresentOrFutureArrayValuesMutate(ko, observable);
       }
-    });
+    }
+  }
 
-    return obj;
+  function isPlainObject( obj ){
+    return !!obj && typeof obj === 'object' && obj.constructor === Object;
   }
 
   // Lazily created by `getAllObservablesForObject` below. Has to be created lazily because the
