@@ -3,7 +3,7 @@
   "version": "0.2.0-alpha",
   "description": "Knockout.js meets ECMAScript 5 properties",
   "author": "Steve Sanderson",
-  "main": "dist/knockout-es5.js",
+  "main": "src/knockout-es5.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/SteveSanderson/knockout-es5.git"
