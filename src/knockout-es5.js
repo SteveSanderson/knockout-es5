@@ -75,6 +75,7 @@
     return obj;
   }
 
+  // fix for ie
   var rFunctionName = /^function\s*([^\s(]+)/;
   function getFunctionName( ctor ){
     if (ctor.name) {
@@ -398,6 +399,12 @@
     ko.getObservable = getObservable;
     ko.valueHasMutated = valueHasMutated;
     ko.defineProperty = defineComputedProperty;
+
+    // todo: test it, maybe added it to ko. directly
+    ko.es5 = {
+      getAllObservablesForObject: getAllObservablesForObject,
+      notifyWhenPresentOrFutureArrayValuesMutate: notifyWhenPresentOrFutureArrayValuesMutate
+    };
   }
 
   // Determines which module loading scenario we're in, grabs dependencies, and attaches to KO
