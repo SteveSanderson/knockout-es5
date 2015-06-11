@@ -102,10 +102,17 @@
       }
 
       var origValue = obj[prop];
+      var isObservable = ko.isObservable(origValue);
       var isArray = Array.isArray(origValue);
-      var observable = ko.isObservable(origValue) ? origValue
+      var observable = isObservable ? origValue
           : isArray ? ko.observableArray(origValue)
           : ko.observable(origValue);
+
+      // add check in case the object is already an observable array
+      if (isObservable && 'push' in observable) {
+        isArray = true;
+        origValue = observable.peek();
+      }
 
       descriptor[prop] = {
         configurable: true,
