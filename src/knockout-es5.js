@@ -113,7 +113,7 @@
 
     var observable;
 
-    function getObservable(value, setting) {
+    function getOrCreateObservable(value, setting) {
       if (observable) {
         return setting ? observable(value) : observable;
       }
@@ -127,17 +127,17 @@
       return (observable = ko.observable(value));
     }
 
-    map[prop] = function () { return getObservable(originalValue); };
+    map[prop] = function () { return getOrCreateObservable(originalValue); };
     return {
       configurable: true,
       enumerable: true,
-      get: function () { return getObservable(originalValue)(); },
-      set: function (value) { getObservable(value, true); }
+      get: function () { return getOrCreateObservable(originalValue)(); },
+      set: function (value) { getOrCreateObservable(value, true); }
     };
   }
 
   function wrap(obj, props, options) {
-    if (!props.length || !canTrack(obj)) {
+    if (!props.length) {
       return;
     }
 
