@@ -44,7 +44,8 @@
    * @param {boolean} propertyNamesOrSettings.deep Use deep track.
    * @param {array.<string>} propertyNamesOrSettings.fields Array of property names to wrap.
    * todo: @param {array.<string>} propertyNamesOrSettings.exclude Array of exclude property names to wrap.
-   * todo: @param {function(string, *):boolean} propertyNamesOrSettings.filter Function to filter property names to wrap. A function that takes ... params
+   * todo: @param {function(string, *):boolean} propertyNamesOrSettings.filter Function to filter property 
+   *   names to wrap. A function that takes ... params
    * @return {object}
    */
   function track(obj, propertyNamesOrSettings) {
@@ -59,17 +60,10 @@
       propertyNamesOrSettings.deep = propertyNamesOrSettings.deep || false;
       propertyNamesOrSettings.fields = propertyNamesOrSettings.fields || Object.getOwnPropertyNames(obj);
 
-      if (propertyNamesOrSettings.deep === true) {
-        trackDeep(propertyNamesOrSettings.fields, obj);
-      } else {
-        return track(obj, propertyNamesOrSettings.fields);
-      }
-
+      wrap(obj, propertyNamesOrSettings.fields, propertyNamesOrSettings.deep);
     } else {
       propertyNames = propertyNamesOrSettings || Object.getOwnPropertyNames(obj);
-      propertyNames.forEach(function(propertyName) {
-        wrap(propertyName, null, obj);
-      });
+      wrap(obj, propertyNames);
     }
 
     return obj;
@@ -84,43 +78,19 @@
     return (ctor.toString().trim().match( rFunctionName ) || [])[1];
   }
 
-  function trackDeep(tree, obj) {
-    var keys = Array.isArray(tree) ? tree : Object.keys(tree);
-    var limb;
-
-    keys.forEach(function(key) {
-      limb = obj[key];
-
-      wrap(key,
-          (('Object' === getFunctionName(limb.constructor)
-          && Object.keys(limb).length)
-              ? limb
-              : null),
-          obj);
-    });
+  function canTrack(obj) {
+    return obj && typeof obj === 'object' && getFunctionName(obj.constructor) === 'Object';
   }
 
-  // Wrap property into observable
-  function wrap(prop, subprops, obj) {
+  function wrap(obj, props, deep) {
+    if (!props.length || !canTrack(obj)) {
+      return;
+    }
+
     var allObservablesForObject = getAllObservablesForObject(obj, true);
-    var origValue, observable, isArray;
+    var descriptor = {};
 
-    if (subprops) {
-      origValue = obj[prop];
-      observable = ko.isObservable(origValue) ? origValue : ko.observable(origValue);
-
-      Object.defineProperty(obj, prop, {
-        configurable: true,
-        enumerable: true,
-        get: observable,
-        set: ko.isWriteableObservable(observable) ? observable : undefined
-      });
-
-      allObservablesForObject[prop] = observable;
-
-      trackDeep(subprops, obj[prop]);
-
-    } else {
+    props.forEach(function (prop) {
       // Skip properties that are already tracked
       if (prop in allObservablesForObject) {
         return;
@@ -131,25 +101,33 @@
         return;
       }
 
-      origValue = obj[prop];
-      isArray = Array.isArray(origValue);
-      observable = ko.isObservable(origValue) ? origValue
+      var origValue = obj[prop];
+      var isArray = Array.isArray(origValue);
+      var observable = ko.isObservable(origValue) ? origValue
           : isArray ? ko.observableArray(origValue)
           : ko.observable(origValue);
 
-      Object.defineProperty(obj, prop, {
+      descriptor[prop] = {
         configurable: true,
         enumerable: true,
         get: observable,
         set: ko.isWriteableObservable(observable) ? observable : undefined
-      });
+      };
 
       allObservablesForObject[prop] = observable;
 
       if (isArray) {
         notifyWhenPresentOrFutureArrayValuesMutate(ko, observable);
+
+        if (deep) {
+          origValue.forEach(function (child) { wrap(child, Object.keys(child), true); });
+        }
+      } else if (deep && canTrack(origValue)) {
+        wrap(origValue, Object.keys(origValue), true);
       }
-    }
+    });
+
+    Object.defineProperties(obj, descriptor);
   }
 
   function isPlainObject( obj ){
