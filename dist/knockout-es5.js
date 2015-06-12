@@ -83,7 +83,7 @@
   }
 
   function wrap(obj, props, deep) {
-    if (!props.length || !canTrack(obj)) {
+    if (!props.length) {
       return;
     }
 
@@ -127,7 +127,11 @@
         notifyWhenPresentOrFutureArrayValuesMutate(ko, observable);
 
         if (deep) {
-          origValue.forEach(function (child) { wrap(child, Object.keys(child), true); });
+          origValue.forEach(function (child) {
+            if (canTrack(child)) {
+              wrap(child, Object.keys(child), true); 
+            }
+          });
         }
       } else if (deep && canTrack(origValue)) {
         wrap(origValue, Object.keys(origValue), true);
