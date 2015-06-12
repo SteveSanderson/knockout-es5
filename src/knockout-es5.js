@@ -120,7 +120,7 @@
 
       if (Array.isArray(value)) {
         observable = ko.observableArray(value);
-        notifyWhenPresentOrFutureArrayValuesMutate(ko, value);
+        notifyWhenPresentOrFutureArrayValuesMutate(ko, observable);
         return observable;
       }
 
