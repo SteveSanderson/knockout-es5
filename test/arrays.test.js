@@ -137,4 +137,18 @@ describe('Array handling', function () {
     assert.equal(allNotifiedValues.length, 1);
     assert.equal(allNotifiedValues[ 0 ], '4,5');
   });
+
+  it('if a property is already an observable array, it still gets wrapped with mutator functions', function () {
+    var plainArray = ['a', 'b', 'c'],
+      obj = ko.track({ myArray: ko.observableArray(plainArray) }),
+      lastNotifiedValue = ko.computed(function() { return obj.myArray.join(','); });
+
+    // Reading the property returns the underlying array value
+    assert.equal(obj.myArray instanceof Array, true);
+    assert.deepEqual(obj.myArray, plainArray);
+    assert.equal(lastNotifiedValue(), 'a,b,c');
+
+    obj.myArray.push('d');
+    assert.equal(lastNotifiedValue(), 'a,b,c,d');
+  });
 });
