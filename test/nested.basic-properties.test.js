@@ -65,6 +65,14 @@ describe('Basic properties', function () {
       }, 'When calling ko.track, you must pass an object as the first parameter.');
     });
 
+    it('`null` is valid field value', function () {
+      var obj = { key: null };
+      ko.track(obj, { deep: true });
+
+      var result = toHaveObservableProperties( obj, ['key'] );
+      assert.strictEqual( result, true, result.message );
+    });
+
     it('makes all properties observable, given no args', function() {
       var child = { },
         obj = { a: 'string', b: 123, c: true, d: child };
