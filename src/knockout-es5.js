@@ -113,9 +113,9 @@
 
     var observable;
 
-    function getOrCreateObservable(value, setting) {
+    function getOrCreateObservable(value, writing) {
       if (observable) {
-        return setting ? observable(value) : observable;
+        return writing ? observable(value) : observable;
       }
 
       if (Array.isArray(value)) {
@@ -388,6 +388,18 @@
 
     return null;
   }
+  
+  // Returns a boolean indicating whether the property on the object has an underlying
+  // observables. This does the check in a way not to create an observable if the
+  // object was created with lazily created observables
+  function isTracked(obj, propertyName) {
+    if (!obj || typeof obj !== 'object') {
+      return false;
+    }
+    
+    var allObservablesForObject = getAllObservablesForObject(obj, false);
+    return !!allObservablesForObject && propertyName in allObservablesForObject;
+  }
 
   // Causes a property's associated observable to fire a change notification. Useful when
   // the property value is a complex object and you've modified a child property.
@@ -422,7 +434,8 @@
     // todo: test it, maybe added it to ko. directly
     ko.es5 = {
       getAllObservablesForObject: getAllObservablesForObject,
-      notifyWhenPresentOrFutureArrayValuesMutate: notifyWhenPresentOrFutureArrayValuesMutate
+      notifyWhenPresentOrFutureArrayValuesMutate: notifyWhenPresentOrFutureArrayValuesMutate,
+      isTracked: isTracked
     };
   }
 
