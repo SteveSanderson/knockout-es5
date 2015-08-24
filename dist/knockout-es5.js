@@ -59,11 +59,12 @@
       // defaults
       propertyNamesOrSettings.deep = propertyNamesOrSettings.deep || false;
       propertyNamesOrSettings.fields = propertyNamesOrSettings.fields || Object.getOwnPropertyNames(obj);
+      propertyNamesOrSettings.lazy = propertyNamesOrSettings.lazy || false;
 
-      wrap(obj, propertyNamesOrSettings.fields, propertyNamesOrSettings.deep);
+      wrap(obj, propertyNamesOrSettings.fields, propertyNamesOrSettings);
     } else {
       propertyNames = propertyNamesOrSettings || Object.getOwnPropertyNames(obj);
-      wrap(obj, propertyNames);
+      wrap(obj, propertyNames, {});
     }
 
     return obj;
@@ -82,13 +83,66 @@
     return obj && typeof obj === 'object' && getFunctionName(obj.constructor) === 'Object';
   }
 
-  function wrap(obj, props, deep) {
+  function createPropertyDescriptor(originalValue, prop, map) {
+    var isObservable = ko.isObservable(originalValue);
+    var isArray = !isObservable && Array.isArray(originalValue);
+    var observable = isObservable ? originalValue
+        : isArray ? ko.observableArray(originalValue)
+        : ko.observable(originalValue);
+
+    map[prop] = function () { return observable; };
+
+    // add check in case the object is already an observable array
+    if (isArray || (isObservable && 'push' in observable)) {
+      notifyWhenPresentOrFutureArrayValuesMutate(ko, observable);
+    }
+
+    return {
+      configurable: true,
+      enumerable: true,
+      get: observable,
+      set: ko.isWriteableObservable(observable) ? observable : undefined
+    };
+  }
+
+  function createLazyPropertyDescriptor(originalValue, prop, map) {
+    if (ko.isObservable(originalValue)) {
+      // no need to be lazy if we already have an observable
+      return createPropertyDescriptor(originalValue, prop, map);
+    }
+
+    var observable;
+
+    function getOrCreateObservable(value, writing) {
+      if (observable) {
+        return writing ? observable(value) : observable;
+      }
+
+      if (Array.isArray(value)) {
+        observable = ko.observableArray(value);
+        notifyWhenPresentOrFutureArrayValuesMutate(ko, observable);
+        return observable;
+      }
+
+      return (observable = ko.observable(value));
+    }
+
+    map[prop] = function () { return getOrCreateObservable(originalValue); };
+    return {
+      configurable: true,
+      enumerable: true,
+      get: function () { return getOrCreateObservable(originalValue)(); },
+      set: function (value) { getOrCreateObservable(value, true); }
+    };
+  }
+
+  function wrap(obj, props, options) {
     if (!props.length) {
       return;
     }
 
     var allObservablesForObject = getAllObservablesForObject(obj, true);
-    var descriptor = {};
+    var descriptors = {};
 
     props.forEach(function (prop) {
       // Skip properties that are already tracked
@@ -101,44 +155,16 @@
         return;
       }
 
-      var origValue = obj[prop];
-      var isObservable = ko.isObservable(origValue);
-      var isArray = Array.isArray(origValue);
-      var observable = isObservable ? origValue
-          : isArray ? ko.observableArray(origValue)
-          : ko.observable(origValue);
+      var originalValue = obj[prop];
+      descriptors[prop] = (options.lazy ? createLazyPropertyDescriptor : createPropertyDescriptor)
+        (originalValue, prop, allObservablesForObject);
 
-      // add check in case the object is already an observable array
-      if (isObservable && 'push' in observable) {
-        isArray = true;
-        origValue = observable.peek();
-      }
-
-      descriptor[prop] = {
-        configurable: true,
-        enumerable: true,
-        get: observable,
-        set: ko.isWriteableObservable(observable) ? observable : undefined
-      };
-
-      allObservablesForObject[prop] = observable;
-
-      if (isArray) {
-        notifyWhenPresentOrFutureArrayValuesMutate(ko, observable);
-
-        if (deep) {
-          origValue.forEach(function (child) {
-            if (canTrack(child)) {
-              wrap(child, Object.keys(child), true); 
-            }
-          });
-        }
-      } else if (deep && canTrack(origValue)) {
-        wrap(origValue, Object.keys(origValue), true);
+      if (options.deep && canTrack(originalValue)) {
+        wrap(originalValue, Object.keys(originalValue), options);
       }
     });
 
-    Object.defineProperties(obj, descriptor);
+    Object.defineProperties(obj, descriptors);
   }
 
   function isPlainObject( obj ){
@@ -356,7 +382,23 @@
     }
 
     var allObservablesForObject = getAllObservablesForObject(obj, false);
-    return (allObservablesForObject && allObservablesForObject[propertyName]) || null;
+    if (allObservablesForObject && propertyName in allObservablesForObject) {
+      return allObservablesForObject[propertyName]();
+    }
+
+    return null;
+  }
+  
+  // Returns a boolean indicating whether the property on the object has an underlying
+  // observables. This does the check in a way not to create an observable if the
+  // object was created with lazily created observables
+  function isTracked(obj, propertyName) {
+    if (!obj || typeof obj !== 'object') {
+      return false;
+    }
+    
+    var allObservablesForObject = getAllObservablesForObject(obj, false);
+    return !!allObservablesForObject && propertyName in allObservablesForObject;
   }
 
   // Causes a property's associated observable to fire a change notification. Useful when
@@ -392,7 +434,8 @@
     // todo: test it, maybe added it to ko. directly
     ko.es5 = {
       getAllObservablesForObject: getAllObservablesForObject,
-      notifyWhenPresentOrFutureArrayValuesMutate: notifyWhenPresentOrFutureArrayValuesMutate
+      notifyWhenPresentOrFutureArrayValuesMutate: notifyWhenPresentOrFutureArrayValuesMutate,
+      isTracked: isTracked
     };
   }
 
