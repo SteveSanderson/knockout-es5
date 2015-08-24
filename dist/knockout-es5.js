@@ -557,6 +557,7 @@ void function(global, undefined_, undefined){
 
     // common per-object storage area made visible by patching getOwnPropertyNames'
     define(Object, namedFunction('getOwnPropertyNames', function getOwnPropertyNames(obj){
+      // gh-43
       var coercedObj = Object(obj), props;
       if (coercedObj.toString() === '[object Window]') {
           try {
