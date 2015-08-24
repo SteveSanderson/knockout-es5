@@ -456,6 +456,7 @@
 
 void function(global, undefined_, undefined){
   var getProps = Object.getOwnPropertyNames,
+      cachedWindowNames = typeof window === 'object' ? Object.getOwnPropertyNames(window) : [],
       defProp  = Object.defineProperty,
       toSource = Function.prototype.toString,
       create   = Object.create,
@@ -513,7 +514,16 @@ void function(global, undefined_, undefined){
 
     // common per-object storage area made visible by patching getOwnPropertyNames'
     define(Object, namedFunction('getOwnPropertyNames', function getOwnPropertyNames(obj){
-      var props = getProps(obj);
+      var coercedObj = Object(obj), props;
+      if (coercedObj.toString() === '[object Window]') {
+          try {
+              props = getProps(obj);
+          } catch (e) {
+              props = cachedWindowNames;
+          }
+      } else {
+          props = getProps(obj);
+      }
       if (hasOwn.call(obj, globalID))
         props.splice(props.indexOf(globalID), 1);
       return props;
