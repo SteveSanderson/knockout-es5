@@ -17,25 +17,28 @@
     "test": "test"
   },
   "dependencies": {
-    "knockout": "3.3.0",
+    "knockout": "3.4.0",
     "weakmap": "0.0.6"
   },
   "devDependencies": {
-    "grunt": "latest",
+    "grunt": "0.4.5",
     "grunt-browserify": "latest",
     "grunt-contrib-concat": "latest",
     "grunt-contrib-jshint": "latest",
     "grunt-contrib-uglify": "latest",
     "grunt-contrib-watch": "latest",
-    "grunt-karma": "latest",
-    "karma": "latest",
-    "karma-mocha": "latest",
-    "karma-chai": "latest",
-    "karma-phantomjs-launcher": "latest",
-    "karma-chrome-launcher": "latest",
-    "karma-firefox-launcher": "latest",
-    "karma-ie-launcher": "latest",
-    "karma-safari-launcher": "latest"
+    "grunt-karma": "0.12.1",
+    "mocha": "2.3.4",
+    "chai": "3.4.1",
+    "phantomjs": "1.9.19",
+    "karma": "0.13.10",
+    "karma-mocha": "0.2.1",
+    "karma-chai": "0.1.0",
+    "karma-phantomjs-launcher": "0.2.1",
+    "karma-chrome-launcher": "0.2.0",
+    "karma-firefox-launcher": "0.1.6",
+    "karma-ie-launcher": "0.2.0",
+    "karma-safari-launcher": "0.1.1"
   },
   "scripts": {
     "test": "grunt test"
