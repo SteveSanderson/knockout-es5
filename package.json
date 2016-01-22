@@ -17,8 +17,10 @@
     "test": "test"
   },
   "dependencies": {
-    "knockout": "3.4.0",
     "weakmap": "0.0.6"
+  },
+  "peerDependencies": {
+    "knockout": ">=2.2.0"
   },
   "devDependencies": {
     "grunt": "0.4.5",
