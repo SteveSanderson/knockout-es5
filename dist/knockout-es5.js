@@ -559,7 +559,7 @@ void function(global, undefined_, undefined){
     define(Object, namedFunction('getOwnPropertyNames', function getOwnPropertyNames(obj){
       // gh-43
       var coercedObj = Object(obj), props;
-      if (coercedObj.toString() === '[object Window]') {
+      if ('toString' in coercedObj && coercedObj.toString() === '[object Window]') {
           try {
               props = getProps(obj);
           } catch (e) {
