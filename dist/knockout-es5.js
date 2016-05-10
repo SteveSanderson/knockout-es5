@@ -559,7 +559,14 @@ void function(global, undefined_, undefined){
     define(Object, namedFunction('getOwnPropertyNames', function getOwnPropertyNames(obj){
       // gh-43
       var coercedObj = Object(obj), props;
-      if ('toString' in coercedObj && coercedObj.toString() === '[object Window]') {
+      // Fixes for debuggers:
+      // 1) Some objects lack .toString(), calling it on them make Chrome
+      // debugger fail when inspecting variables.
+      // 2) Window.prototype methods and properties are private in IE11 and
+      // throw 'Invalid calling object'.
+      if (coercedObj !== Window.prototype && 'toString' in coercedObj
+        && coercedObj.toString() === '[object Window]')
+      {
           try {
               props = getProps(obj);
           } catch (e) {
