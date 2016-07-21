@@ -444,7 +444,7 @@
     if (typeof exports === 'object' && typeof module === 'object') {
       // Node.js case - load KO and WeakMap modules synchronously
       ko = require('knockout');
-      var WM = require('../lib/weakmap');
+      var WM = global.WeakMap || require('../lib/weakmap');
       attachToKo(ko);
       weakMapFactory = function() { return new WM(); };
       module.exports = ko;
