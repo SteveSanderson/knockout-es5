@@ -465,7 +465,9 @@
 
   prepareExports();
 
-})(this);
+})(typeof window !== 'undefined' ? window : 
+   typeof global !== 'undefined' ? global :
+   this);
 
 /*! WeakMap shim
  * (The MIT License)
