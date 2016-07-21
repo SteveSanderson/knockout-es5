@@ -15,7 +15,7 @@ module.exports = function(grunt) {
       dist: {
         files: {
           'dist/knockout-es5.js': ['src/knockout-es5.js', 'lib/weakmap.js'],
-          'dist/knockout-es6.js': ['dist/knockout-es5.js']
+          'dist/knockout-es6.js': ['src/knockout-es5.js']
         }
       }
     },

@@ -8,6 +8,10 @@
   'use strict';
 
   var ko;
+  
+  // A function that returns a new ES6-compatible WeakMap instance (using ES5 shim if needed).
+  // Instantiated by prepareExports, accounting for which module loader is being used.
+  var weakMapFactory;
 
   // Model tracking
   // --------------
@@ -418,10 +422,6 @@
   // it is in (Node.js or a browser `<script>` tag), stashes a reference to its dependencies
   // (currently that's just the WeakMap shim), and then finally attaches itself to whichever
   // instance of Knockout.js it can find.
-
-  // A function that returns a new ES6-compatible WeakMap instance (using ES5 shim if needed).
-  // Instantiated by prepareExports, accounting for which module loader is being used.
-  var weakMapFactory;
 
   // Extends a Knockout instance with Knockout-ES5 functionality
   function attachToKo(ko) {
