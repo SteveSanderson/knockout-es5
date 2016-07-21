@@ -13,8 +13,10 @@ module.exports = function(grunt) {
 
     concat: {
       dist: {
-        src: ['src/knockout-es5.js', 'lib/weakmap.js'],
-        dest: 'dist/knockout-es5.js'
+        files: {
+          'dist/knockout-es5.js': ['src/knockout-es5.js', 'lib/weakmap.js'],
+          'dist/knockout-es6.js': ['dist/knockout-es5.js']
+        }
       }
     },
 
@@ -23,8 +25,10 @@ module.exports = function(grunt) {
         preserveComments: 'some'
       },
       build: {
-        src: 'dist/knockout-es5.js',
-        dest: 'dist/knockout-es5.min.js'
+        files: {
+          'dist/knockout-es5.min.js': 'dist/knockout-es5.js',
+          'dist/knockout-es6.min.js': 'dist/knockout-es6.js'
+        }
       }
     },
 
