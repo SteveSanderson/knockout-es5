@@ -24,8 +24,15 @@ var ko = require('./knockout-es5');
 // Now use ko - it has been enhanced with ES5 features
 ```
 
+Version without weakmap in build
+=
+* knockout-es5-clean.js
+* knockout-es5-clean.min.js
+
+This files don't have weakmap shim in code. You have to link weakmap shim or use es6 for it.
+
 Recursive traversal of nested objects
-=====================================
+=
 ```js
 ko.track(nestedObj, { deep: true });
 ```
