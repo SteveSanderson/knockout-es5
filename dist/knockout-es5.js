@@ -8,6 +8,10 @@
   'use strict';
 
   var ko;
+  
+  // A function that returns a new ES6-compatible WeakMap instance (using ES5 shim if needed).
+  // Instantiated by prepareExports, accounting for which module loader is being used.
+  var weakMapFactory;
 
   // Model tracking
   // --------------
@@ -419,10 +423,6 @@
   // (currently that's just the WeakMap shim), and then finally attaches itself to whichever
   // instance of Knockout.js it can find.
 
-  // A function that returns a new ES6-compatible WeakMap instance (using ES5 shim if needed).
-  // Instantiated by prepareExports, accounting for which module loader is being used.
-  var weakMapFactory;
-
   // Extends a Knockout instance with Knockout-ES5 functionality
   function attachToKo(ko) {
     ko.track = track;
@@ -444,7 +444,7 @@
     if (typeof exports === 'object' && typeof module === 'object') {
       // Node.js case - load KO and WeakMap modules synchronously
       ko = require('knockout');
-      var WM = require('../lib/weakmap');
+      var WM = global.WeakMap || require('../lib/weakmap');
       attachToKo(ko);
       weakMapFactory = function() { return new WM(); };
       module.exports = ko;
@@ -465,7 +465,9 @@
 
   prepareExports();
 
-})(this);
+})(typeof window !== 'undefined' ? window : 
+   typeof global !== 'undefined' ? global :
+   this);
 
 /*! WeakMap shim
  * (The MIT License)
