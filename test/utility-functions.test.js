@@ -1,10 +1,11 @@
 describe('Utility functions', function () {
 
   describe('ko.getObservable()', function () {
-
     it('returns the observable corresponding to a given property', function () {
-      var obj = ko.track({ alpha: 1, beta: 2 }),
-        observable = ko.getObservable(obj, 'alpha');
+      var vm = { alpha: 1, beta: 2, gamma: ko.observable(3) };
+      var obj = ko.track(vm),
+        observable = ko.getObservable(obj, 'alpha'),
+        normalDeclaredObservable = ko.getObservable(obj, 'gamma');
 
       // Check we can both read and write the corresponding property value
       assert.equal(observable(), 1);
@@ -14,6 +15,7 @@ describe('Utility functions', function () {
       observable.subscribe(function(newVal) { receivedValue = newVal; });
       obj.alpha = 'New value';
       assert.equal(receivedValue, 'New value');
+      assert.equal(normalDeclaredObservable(), 3);
     });
 
     it('returns null if the given object isn\'t an object', function() {
