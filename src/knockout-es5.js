@@ -389,6 +389,11 @@
     if (allObservablesForObject && propertyName in allObservablesForObject) {
       return allObservablesForObject[propertyName]();
     }
+    
+    var observable = obj[propertyName];
+    if (ko.isObservable(observable)) {
+        return observable;
+    }
 
     return null;
   }
